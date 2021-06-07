@@ -1,0 +1,2 @@
+mailid = 'xxxxxx'
+paswd = 'xxxxx'
