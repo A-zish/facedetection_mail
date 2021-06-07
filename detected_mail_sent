@@ -1,0 +1,58 @@
+import cv2 as cv
+import smtplib        #Library for email
+import cred           # File where my email and passwords are saved it is .py file
+import os
+
+
+model = cv.CascadeClassifier('haarcascade_frontalface_default.xml')    
+cap = cv.VideoCapture(0)
+def facedetect():
+    while True:
+        ret, photo = cap.read()
+        face = model.detectMultiScale(photo, scaleFactor = 1.2)
+        if len(face) == 0:
+            pass
+        else:    
+            x1=face[0][0]
+            y1=face[0][1]
+            x2=x1 + face[0][2]
+            y2=y1 + face[0][3]
+
+            for rphoto in face:
+                rphoto = cv.rectangle(photo, ( x1,  y1),(x2, y2), [0,255,0], 5)
+                cv.imshow('hi', rphoto)
+                crop = rphoto[x1:x2,y1:y2]
+                cv.imwrite('/Users/Ashish/Documents/CODES/Opencv/helo.jpg', crop )
+                
+            
+            if cv.waitKey(10) == 13:
+                break
+    cv.destroyAllWindows()                
+    if len(face) == 1:
+        import smtplib
+        import cred
+        from email.message import EmailMessage
+        import imghdr
+        msg = EmailMessage()
+        msg['Subject'] = 'Detected some thing'
+        msg['From'] = cred.mailid
+        msg['To'] = 'ashishkumardwivedi.ce21@jecrc.ac.in'     
+        msg.set_content("Hey i detected someone sendig photo")
+        with open('helo.jpg','rb' ) as det:
+            file_data = det.read()
+            file_type = imghdr.what(det.name)
+            file_name = det.name
+            
+        msg.add_attachment(file_data, maintype = 'image', subtype = file_type, filename = file_name)
+            
+        with smtplib.SMTP_SSL('smtp.gmail.com',465) as smtp:
+            smtp.login(cred.mailid, cred.paswd)
+            
+            smtp.send_message(msg)
+    
+                   
+            
+            
+facedetect()   
+
+cap.release()
